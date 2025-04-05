@@ -36,6 +36,7 @@ among_us = """
 class scanner:
     def __init__(self):
         self.timeout_val = 1
+
     """IP FUNCIONS"""
     #Get the local IP address
     def get_host_ip(self):
@@ -49,6 +50,17 @@ class scanner:
             return {'ip': None, 'status': 'error', 'error': str(e)}
         finally:
             s.close()
+
+    #Get Subnet
+    def get_subnet(self):
+        #check ip
+        self.host_ip = self.get_host_ip()
+        if self.host_ip['status'] == 'error':
+            return {'subnet': None, 'status': 'error', 'error': self.host_ip['error']}
+        else:
+            ip = self.host_ip['ip']
+        self.subnet = self.split_ip(ip)
+        return {'subnet': self.subnet, 'status': 'success', 'error': None}
 
     #Split the ip address
     def split_ip(self, ip):
@@ -69,20 +81,9 @@ class scanner:
             return octet[-1] 
         else:
             raise ValueError("[!] Invalid IP.")
-                         
-    #Get Subnet
-    def get_subnet(self):
-        host_ip = self.get_host_ip()
-        if host_ip['status'] == 'error':
-            return {'subnet': None, 'status': 'error', 'error': host_ip['error']}
-        host_ip = host_ip['ip']
-        self.subnet = self.split_ip(host_ip)
-        return {'subnet': self.subnet, 'status': 'success', 'error': None}
     
     #Ip validation
     def ip_validation(self, ip):
-        if not self.subnet:
-            self.get_subnet()
         if self.split_ip(ip) == self.subnet:
             return True
         return False
@@ -99,7 +100,7 @@ class scanner:
                 for sent, received in response:
                     return {'ip': ip, 'mac': received.hwsrc, 'status': 'up', 'error': None}
             else:
-                return {'ip': ip, 'mac': None, 'status': 'down', 'error': None}
+                return {'ip': ip, 'mac': 'unknown', 'status': 'down', 'error': None}
         except Exception as e:
             return {'clients': None, 'status': 'error', 'error': str(e)}
     
